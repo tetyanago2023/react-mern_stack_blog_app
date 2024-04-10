@@ -64,11 +64,11 @@ const deleteBlog = async (req, res) => {
 
         return res
             .status(500)
-            .json({ message: "Unable to delete ! Please try again" });
+            .json({ message: "Unable to delete! Please try again" });
     }
 };
 
-const updateABlog = async (req, res) => {
+const updateBlog = async (req, res) => {
     const id = req.params.id;
 
     const { title, description } = req.body;
@@ -83,7 +83,7 @@ const updateABlog = async (req, res) => {
         console.log(e);
 
         return res.status(500).json({
-            message: "Something went wrong while updating ! Please try again",
+            message: "Something went wrong while updating! Please try again",
         });
     }
 
@@ -94,4 +94,4 @@ const updateABlog = async (req, res) => {
     return res.status(200).json({ currentBlogToUpdate });
 };
 
-module.exports = { fetchListOfBlogs, deleteBlog, updateABlog, addNewBlog };
+module.exports = { fetchListOfBlogs, deleteBlog, updateBlog, addNewBlog };
