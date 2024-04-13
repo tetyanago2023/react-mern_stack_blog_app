@@ -7,19 +7,22 @@ const Blog = require("../model/Blog");
 //update a blog
 
 const fetchListOfBlogs = async (req, res) => {
-    let blogList;
     try {
-        blogList = await Blog.find();
-        res.status(200).json(blogList);
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-    if(!blogList){
-        res.status(404).json({message: "No blog found"});
-    }
+        const blogList = await Blog.find();
 
-    return res.status(200).json(blogList);
+        // Check if blogList is empty
+        if (!blogList.length) {
+            return res.status(404).json({ message: "No blogs found" });
+        }
+
+        // Return the list of blogs to the client
+        return res.status(200).json(blogList);
+    } catch (error) {
+        console.error("Error fetching blogs:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
 };
+
 
 const addNewBlog = async (req, res) => {
     const { title, description } = req.body;
@@ -29,22 +32,14 @@ const addNewBlog = async (req, res) => {
         description,
         date: currentDate,
     });
+
     try {
         await newlyCreateBlog.save();
-    } catch (e) {
-        console.log(e);
+        return res.status(200).json({ newlyCreateBlog });
+    } catch (error) {
+        console.error("Error creating blog:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-
-    try {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        await newlyCreateBlog.save(session);
-        session.commitTransaction();
-    } catch (e) {
-        return res.send(500).json({ message: e });
-    }
-
-    return res.status(200).json({ newlyCreateBlog });
 };
 
 const deleteBlog = async (req, res) => {
