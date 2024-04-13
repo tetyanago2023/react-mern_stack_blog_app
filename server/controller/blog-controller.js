@@ -31,20 +31,17 @@ const addNewBlog = async (req, res) => {
     });
     try {
         await newlyCreateBlog.save();
-        res.status(201).json(newlyCreateBlog);
     } catch (e) {
-        res.status(400).json({ message: e.message });
+        console.log(e);
     }
 
     try {
         const session = await mongoose.startSession();
         session.startTransaction();
-        await newlyCreateBlog.save({ session: session });
-        await session.commitTransaction();
+        await newlyCreateBlog.save(session);
+        session.commitTransaction();
     } catch (e) {
-        console.log(e);
-
-        return res.status(500).json({message: e.message});
+        return res.send(500).json({ message: e });
     }
 
     return res.status(200).json({ newlyCreateBlog });
