@@ -1,4 +1,4 @@
-import {createContext, useState} from "react";
+import { createContext, useState } from "react";
 
 export const GlobalContext = createContext(null);
 
@@ -10,6 +10,7 @@ export default function GlobalState({ children }) {
 
     const [blogList, setBlogList] = useState([]);
     const [pending, setPending] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
 
     return (
         <GlobalContext.Provider
@@ -20,8 +21,8 @@ export default function GlobalState({ children }) {
                 setPending,
                 formData,
                 setFormData,
-                // isEdit,
-                // setIsEdit,
+                isEdit,
+                setIsEdit,
             }}
         >
             {children}

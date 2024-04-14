@@ -7,26 +7,24 @@ const Blog = require("../model/Blog");
 //update a blog
 
 const fetchListOfBlogs = async (req, res) => {
+    let blogList;
     try {
-        const blogList = await Blog.find();
-
-        // Check if blogList is empty
-        if (!blogList.length) {
-            return res.status(404).json({ message: "No blogs found" });
-        }
-
-        // Return the list of blogs to the client
-        return res.status(200).json(blogList);
-    } catch (error) {
-        console.error("Error fetching blogs:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        blogList = await Blog.find();
+    } catch (e) {
+        console.log(e);
     }
-};
 
+    if (!blogList) {
+        return res.status(404).json({ message: "No Blogs Found" });
+    }
+
+    return res.status(200).json({ blogList });
+};
 
 const addNewBlog = async (req, res) => {
     const { title, description } = req.body;
     const currentDate = new Date();
+
     const newlyCreateBlog = new Blog({
         title,
         description,
@@ -35,32 +33,41 @@ const addNewBlog = async (req, res) => {
 
     try {
         await newlyCreateBlog.save();
-        return res.status(200).json({ newlyCreateBlog });
-    } catch (error) {
-        console.error("Error creating blog:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+    } catch (e) {
+        console.log(e);
     }
+
+    try {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        await newlyCreateBlog.save(session);
+        session.commitTransaction();
+    } catch (e) {
+        return res.send(500).json({ message: e });
+    }
+
+    return res.status(200).json({ newlyCreateBlog });
 };
 
-const deleteBlog = async (req, res) => {
-    const { id } = req.params;
+const deleteABlog = async (req, res) => {
+    const id = req.params.id;
+
     try {
         const findCurrentBlog = await Blog.findByIdAndDelete(id);
         if (!findCurrentBlog) {
             return res.status(404).json({ message: "Blog not found" });
         }
 
-        return res.status(200).json({ message: "Blog deleted successfully" });
+        return res.status(200).json({ message: "Successfully Deleted" });
     } catch (e) {
         console.log(e);
-
         return res
             .status(500)
-            .json({ message: "Unable to delete! Please try again" });
+            .json({ message: "Unable to delete ! Please try again" });
     }
 };
 
-const updateBlog = async (req, res) => {
+const updateABlog = async (req, res) => {
     const id = req.params.id;
 
     const { title, description } = req.body;
@@ -75,7 +82,7 @@ const updateBlog = async (req, res) => {
         console.log(e);
 
         return res.status(500).json({
-            message: "Something went wrong while updating! Please try again",
+            message: "Something went wrong while updating ! Please try again",
         });
     }
 
@@ -86,4 +93,4 @@ const updateBlog = async (req, res) => {
     return res.status(200).json({ currentBlogToUpdate });
 };
 
-module.exports = { fetchListOfBlogs, deleteBlog, updateBlog, addNewBlog };
+module.exports = { fetchListOfBlogs, deleteABlog, updateABlog, addNewBlog };
